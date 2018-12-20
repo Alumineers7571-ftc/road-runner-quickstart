@@ -23,9 +23,11 @@ public class SplineTestOpMode extends LinearOpMode {
         SampleMecanumDriveBase drive = new SampleMecanumDriveREV(hardwareMap);
 
         Trajectory trajectory = drive.trajectoryBuilder()
-                .splineTo(new Pose2d(30, 30, 0))
+                .splineTo(new Pose2d(45, 35, 0))
                 .waitFor(1)
-                .splineTo(new Pose2d(0, 0, 0))
+                .turn(Math.PI/4)
+                .forward(2)
+                .splineTo(new Pose2d())
                 .build();
 
         waitForStart();
