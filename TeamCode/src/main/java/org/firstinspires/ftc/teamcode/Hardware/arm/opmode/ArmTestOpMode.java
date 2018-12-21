@@ -1,10 +1,10 @@
-package org.firstinspires.ftc.teamcode.arm.opmode;
+package org.firstinspires.ftc.teamcode.Hardware.arm.opmode;
 
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.arm.Arm;
+import org.firstinspires.ftc.teamcode.Hardware.arm.Arm;
 
 /*
  * Simple test of motion-profiled arm autonomous operation. The arm should move *smoothly*

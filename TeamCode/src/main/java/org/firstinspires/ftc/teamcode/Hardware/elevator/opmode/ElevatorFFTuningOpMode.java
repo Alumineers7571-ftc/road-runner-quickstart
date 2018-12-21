@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.arm.opmode;
+package org.firstinspires.ftc.teamcode.Hardware.elevator.opmode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.util.NanoClock;
@@ -6,14 +6,14 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.arm.Arm;
+import org.firstinspires.ftc.teamcode.Hardware.elevator.Elevator;
 import org.firstinspires.ftc.teamcode.util.TuningUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /*
- * Op mode for computing kV, kStatic, and kA from various arm motions. Note: for those using the
+ * Op mode for computing kV, kStatic, and kA from various elevator motions. Note: for those using the
  * built-in PID, **kStatic and kA should not be tuned**. For the curious, here's an outline of the
  * basic procedure:
  *   1. Slowly ramp the motor power and record encoder values along the way.
@@ -25,15 +25,15 @@ import java.util.List;
  */
 @Config
 @Autonomous
-public class ArmFFTuningOpMode extends LinearOpMode {
+public class ElevatorFFTuningOpMode extends LinearOpMode {
     private static final double EPSILON = 1e-2;
 
     public static final double MAX_POWER = 0.7;
-    public static final double ANGLE = 0.75 * Arm.MAX_ANGLE;
+    public static final double DISTANCE = 0.75 * Elevator.MAX_HEIGHT;
 
     @Override
     public void runOpMode() throws InterruptedException {
-        Arm arm = new Arm(hardwareMap);
+        Elevator elevator = new Elevator(hardwareMap);
 
         NanoClock clock = NanoClock.system();
 
@@ -81,11 +81,11 @@ public class ArmFFTuningOpMode extends LinearOpMode {
         telemetry.log().add("Running...");
         telemetry.update();
 
-        double maxRpm = Arm.MOTOR_CONFIG.getMaxRPM();
-        double maxVel = maxRpm * Arm.GEAR_RATIO * 2 * Math.PI / 60.0;
+        double maxRpm = Elevator.MOTOR_CONFIG.getMaxRPM();
+        double maxVel = maxRpm * Elevator.GEAR_RATIO * 2 * Math.PI * Elevator.SPOOL_RADIUS / 60.0;
         double finalVel = MAX_POWER * maxVel;
-        double accel = (finalVel * finalVel) / (2.0 * ANGLE);
-        double rampTime = Math.sqrt(2.0 * ANGLE / accel);
+        double accel = (finalVel * finalVel) / (2.0 * DISTANCE);
+        double rampTime = Math.sqrt(2.0 * DISTANCE / accel);
 
         double startTime = clock.seconds();
         List<Double> timeSamples = new ArrayList<>();
@@ -102,11 +102,11 @@ public class ArmFFTuningOpMode extends LinearOpMode {
 
             timeSamples.add(elapsedTime);
             powerSamples.add(power);
-            positionSamples.add(arm.getCurrentAngle());
+            positionSamples.add(elevator.getCurrentHeight());
 
-            arm.setPower(power);
+            elevator.setPower(power);
         }
-        arm.setPower(0);
+        elevator.setPower(0);
 
         TuningUtil.RampFFResult rampResult = TuningUtil.fitRampData(timeSamples, positionSamples, powerSamples, fitIntercept);
 
@@ -157,13 +157,13 @@ public class ArmFFTuningOpMode extends LinearOpMode {
             telemetry.log().add("Running...");
             telemetry.update();
 
-            double maxPowerTime = 0.75 * ANGLE / maxVel; // 0.75 = "safety factor"
+            double maxPowerTime = 0.75 * DISTANCE / maxVel; // 0.75 = "safety factor"
 
             startTime = clock.seconds();
             timeSamples.clear();
             positionSamples.clear();
 
-            arm.setPower(-MAX_POWER);
+            elevator.setPower(-MAX_POWER);
             while (!isStopRequested()) {
                 double elapsedTime = clock.seconds() - startTime;
                 if (elapsedTime > maxPowerTime) {
@@ -171,9 +171,9 @@ public class ArmFFTuningOpMode extends LinearOpMode {
                 }
 
                 timeSamples.add(elapsedTime);
-                positionSamples.add(arm.getCurrentAngle());
+                positionSamples.add(elevator.getCurrentHeight());
             }
-            arm.setPower(0);
+            elevator.setPower(0);
 
             TuningUtil.AccelFFResult accelResult = TuningUtil.fitConstantPowerData(timeSamples, positionSamples,
                     -MAX_POWER, rampResult.kV, rampResult.kStatic);
