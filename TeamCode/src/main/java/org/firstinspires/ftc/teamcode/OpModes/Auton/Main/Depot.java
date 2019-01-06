@@ -139,7 +139,7 @@ public class Depot extends LinearOpMode{
         vuforia.showDebug();
         vuforia.start();
 
-        robot.tm.setTMUp();
+        //robot.tm.setTMUp();
 
         telemetry.addLine("Ready");
 
